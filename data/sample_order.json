@@ -1,0 +1,13 @@
+{
+  "seller_customer_distance_km": 10.884618773074278,
+  "total_freight": 7.65,
+  "total_price": 55.0,
+  "num_items": 1,
+  "num_unique_products": 1,
+  "num_unique_sellers": 1,
+  "total_product_weight_g": 200.0,
+  "total_product_volume_cm3": 640.0,
+  "customer_state": "SP",
+  "order_purchase_timestamp": "2018-06-21T08:41:07",
+  "order_estimated_delivery_date": "2018-07-04T00:00:00"
+}

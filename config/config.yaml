@@ -1,0 +1,28 @@
+project:
+  name: "Qafza Training"
+  version: "1.0.0"
+
+paths:
+  data_dir: "data"
+  artifacts_dir: "data/artifacts"
+  features_dir: "data/artifacts/features"
+  model_dir: "data/artifacts/model"
+
+artifacts:
+  feature_list: "data/artifacts/features/05_feature_list.csv"
+  preprocessor: "data/artifacts/features/05_preprocessor.joblib"
+  model: "data/artifacts/model/06_logistic_regression_balanced.joblib"
+
+model:
+  threshold: 0.67
+
+logging:
+  level: INFO
+  directory: data\artifacts\logs
+  filename: inference.log
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment_name: qafza-olist
+  registered_model_name: qafza-olist-delivery-delay
+  model_alias: production

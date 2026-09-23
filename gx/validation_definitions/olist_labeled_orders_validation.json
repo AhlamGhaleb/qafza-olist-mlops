@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "f90850ca-7275-4860-88d3-00c6d28a27fc",
+      "name": "labeled_orders"
+    },
+    "batch_definition": {
+      "id": "3ed43dc6-99ed-4e5a-8af1-56c50bd4e442",
+      "name": "labeled_orders_batch"
+    },
+    "datasource": {
+      "id": "862dc565-be2c-47d4-8768-a4a05d6fdb1a",
+      "name": "olist_artifacts"
+    }
+  },
+  "id": "3281e518-b52f-4bc4-8803-a945e9d87322",
+  "name": "olist_labeled_orders_validation",
+  "suite": {
+    "id": "080d9899-b671-4dd4-815c-91218fff9dc4",
+    "name": "olist_labeled_orders_quality"
+  }
+}

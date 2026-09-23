@@ -1,0 +1,12 @@
+{
+  "actions": [],
+  "id": "0cb10814-17d0-4fd1-8822-35dab617a94c",
+  "name": "olist_labeled_orders_checkpoint",
+  "result_format": "SUMMARY",
+  "validation_definitions": [
+    {
+      "id": "3281e518-b52f-4bc4-8803-a945e9d87322",
+      "name": "olist_labeled_orders_validation"
+    }
+  ]
+}
