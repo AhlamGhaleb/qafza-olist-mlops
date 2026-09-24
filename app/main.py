@@ -1,9 +1,11 @@
 import time
-
+import logging
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 
 from app.schemas import (
+    BatchPredictionRequest,
+    BatchPredictionResponse,
     HealthResponse,
     ModelInfoResponse,
     OrderRequest,
@@ -21,6 +23,8 @@ configure_logging(
     log_filename=config["logging"]["filename"],
     log_level=config["logging"]["level"],
 )
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Qafza Olist Delivery Delay API",
@@ -76,6 +80,17 @@ def predict_order(order: OrderRequest):
 
         latency = time.perf_counter() - start
 
+        logger.info(
+               "Prediction request | input=%s | output=%s | latency=%.6fs | model_version=%s",
+                order.model_dump(),
+                      {
+                        "prediction": prediction,
+                        "probability": probability,
+                       },
+                latency,
+                config["mlflow"]["model_alias"],
+        )
+
         return {
             "prediction": prediction,
             "probability": probability,
@@ -94,4 +109,62 @@ def predict_order(order: OrderRequest):
         raise HTTPException(
             status_code=500,
             detail="Prediction failed.",
+        ) from exc
+
+
+@app.post(
+    "/predict/batch",
+    response_model=BatchPredictionResponse,
+)
+def predict_batch(request: BatchPredictionRequest):
+
+    start = time.perf_counter()
+
+    try:
+        data = pd.DataFrame(
+            [order.model_dump() for order in request.orders]
+        )
+
+        predictions, probabilities = run_inference(
+            data
+        )
+
+        results = [
+            {
+                "prediction": int(prediction),
+                "probability": float(probability),
+                "model_version": config["mlflow"][
+                    "model_alias"
+                ],
+            }
+            for prediction, probability in zip(
+                predictions,
+                probabilities,
+            )
+        ]
+
+        latency = time.perf_counter() - start
+
+        logger.info(
+            "Batch prediction request | input=%s | output=%s | latency=%.6fs | model_version=%s",
+            [order.model_dump() for order in request.orders],
+            results,
+            latency,
+            config["mlflow"]["model_alias"],
+        )
+
+        return {
+            "predictions": results,
+        }
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=str(exc),
+        ) from exc
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Batch prediction failed.",
         ) from exc

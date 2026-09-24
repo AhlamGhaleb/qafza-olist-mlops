@@ -17,6 +17,15 @@ __pycache__/
 Thumbs.db
 
 # Generated artifacts
-data/artifacts/
+data/artifacts/*
+!data/artifacts/*.dvc
+
+!data/artifacts/features/
+data/artifacts/features/*
+!data/artifacts/features/*.dvc
+
+!data/artifacts/model/
+data/artifacts/model/*
+!data/artifacts/model/*.dvc
 mlflow.db
 mlartifacts/

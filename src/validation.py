@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-
+from src.config import PROJECT_ROOT
+import great_expectations as gx
 import pandas as pd
 
 
@@ -43,6 +44,8 @@ def validate_input(data: pd.DataFrame) -> ValidationResult:
             valid=False,
             errors=errors,
         )
+    ge_errors = validate_with_great_expectations(data)
+    errors.extend(ge_errors)
 
     numeric_columns = [
         "seller_customer_distance_km",
@@ -84,3 +87,47 @@ def validate_input(data: pd.DataFrame) -> ValidationResult:
         valid=len(errors) == 0,
         errors=errors,
     )
+
+def validate_with_great_expectations(data: pd.DataFrame) -> list[str]:
+    context = gx.get_context(
+        context_root_dir=str(PROJECT_ROOT / "gx")
+    )
+
+    suite = context.suites.get("olist_inference_input_quality")
+
+    source = context.data_sources.get("olist_inference")
+    asset = source.get_asset("inference_requests")
+    batch_definition = asset.get_batch_definition("inference_batch")
+
+    ge_data = data.copy()
+
+    date_columns = [
+        "order_purchase_timestamp",
+        "order_estimated_delivery_date",
+    ]
+
+    for column in date_columns:
+        ge_data[column] = pd.to_datetime(
+            ge_data[column],
+            errors="coerce",
+        )
+
+    batch = batch_definition.get_batch(
+        batch_parameters={"dataframe": ge_data}
+    )
+
+    result = batch.validate(suite)
+
+    if result.success:
+        return []
+
+    failed_expectations = [
+        item.expectation_config.type
+        for item in result.results
+        if not item.success
+    ]
+
+    return [
+        "Great Expectations validation failed: "
+        + ", ".join(failed_expectations)
+    ]

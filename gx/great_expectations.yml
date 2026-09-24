@@ -97,5 +97,17 @@ fluent_datasources:
         connect_options:
           glob_directive: 02_labeled_orders1.parquet
     base_directory: C:\Users\Ahlam\Qafza_Training\data\artifacts
+  olist_inference:
+    type: pandas
+    id: b9ae60be-d0e8-417c-a29c-a7190fff9a47
+    assets:
+      inference_requests:
+        type: dataframe
+        id: c54f273f-7021-42c7-aa32-d3da4a5fc366
+        batch_metadata: {}
+        batch_definitions:
+          inference_batch:
+            id: a85fcc9d-45bb-4e8a-b2fb-5a30950d1ca8
+            partitioner:
 analytics_enabled:
 data_context_id: d2f17236-3a92-437b-8e9f-9727b8ab1f37

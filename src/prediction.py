@@ -1,5 +1,7 @@
-import joblib
 import logging
+
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 
 from src.config import load_config
@@ -10,40 +12,43 @@ logger = logging.getLogger(__name__)
 
 def load_model():
     """
-    Load the trained model saved from Notebook 6.
+    Load the registered trained model from MLflow.
 
     The model is loaded only for prediction.
     It is never trained again during inference.
     """
     try:
         config = load_config()
-        model_path = config["artifacts"]["model"]
 
-        model = joblib.load(model_path)
+        tracking_uri = config["mlflow"]["tracking_uri"]
+        registered_model_name = config["mlflow"]["registered_model_name"]
+        model_alias = config["mlflow"]["model_alias"]
+
+        mlflow.set_tracking_uri(tracking_uri)
+
+        model_uri = (
+            f"models:/{registered_model_name}@{model_alias}"
+        )
+
+        model = mlflow.sklearn.load_model(model_uri)
 
         logger.info(
-            "Model loaded successfully from: %s",
-            model_path,
+            "Model loaded successfully from MLflow Registry: %s",
+            model_uri,
         )
 
         return model
 
-    except FileNotFoundError:
-        logger.error(
-            "Model file not found."
-        )
-        raise
-
     except Exception:
         logger.exception(
-            "Failed to load the model."
+            "Failed to load model from MLflow Registry."
         )
         raise
 
 
 def predict(data: pd.DataFrame):
     """
-    Predict delivery delay using the saved model.
+    Predict delivery delay using the registered model.
 
     Returns:
         prediction: 0 for on-time/early, 1 for delayed

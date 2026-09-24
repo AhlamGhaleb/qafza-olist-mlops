@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import List
 from pydantic import BaseModel
 
 
@@ -16,12 +16,16 @@ class OrderRequest(BaseModel):
     order_purchase_timestamp: datetime
     order_estimated_delivery_date: datetime
 
+class BatchPredictionRequest(BaseModel):
+    orders: List[OrderRequest]
 
 class PredictionResponse(BaseModel):
     prediction: int
     probability: float
     model_version: str
 
+class BatchPredictionResponse(BaseModel):
+    predictions: List[PredictionResponse]
 
 class HealthResponse(BaseModel):
     status: str
