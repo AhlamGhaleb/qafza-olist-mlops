@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ app/
 COPY src/ src/
 COPY config/ config/
+COPY gx/ gx/
 COPY data/artifacts/features/05_preprocessor.joblib data/artifacts/features/05_preprocessor.joblib
 COPY data/artifacts/model/06_logistic_regression_balanced.joblib data/artifacts/model/06_logistic_regression_balanced.joblib
 

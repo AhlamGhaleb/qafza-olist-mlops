@@ -3,7 +3,6 @@
 .github
 .ipynb_checkpoints
 notebooks
-gx
 data/*.csv
 data/*.dvc
 data/artifacts/*.parquet

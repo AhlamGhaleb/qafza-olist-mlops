@@ -1,0 +1,5 @@
+outs:
+- md5: 30d3d82d3f48ec99926c2c8e34490665
+  size: 2687
+  hash: md5
+  path: 06_logistic_regression_balanced.joblib

@@ -1,5 +1,7 @@
 import time
 import logging
+from threading import Lock
+
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 
@@ -32,6 +34,40 @@ app = FastAPI(
 )
 
 
+# Simple in-process monitoring metrics
+metrics = {
+    "request_count": 0,
+    "error_count": 0,
+    "prediction_count": 0,
+    "prediction_0_count": 0,
+    "prediction_1_count": 0,
+    "total_latency_seconds": 0.0,
+}
+
+metrics_lock = Lock()
+
+
+def record_metrics(
+    latency: float,
+    predictions=None,
+    error: bool = False,
+):
+    with metrics_lock:
+        metrics["request_count"] += 1
+
+        if error:
+            metrics["error_count"] += 1
+
+        metrics["total_latency_seconds"] += latency
+
+        if predictions is not None:
+            prediction_list = [int(value) for value in predictions]
+
+            metrics["prediction_count"] += len(prediction_list)
+            metrics["prediction_0_count"] += prediction_list.count(0)
+            metrics["prediction_1_count"] += prediction_list.count(1)
+
+
 @app.get(
     "/health",
     response_model=HealthResponse,
@@ -58,6 +94,38 @@ def model_info():
     }
 
 
+@app.get("/metrics")
+def get_metrics():
+    with metrics_lock:
+        request_count = metrics["request_count"]
+        error_count = metrics["error_count"]
+
+        average_latency = (
+            metrics["total_latency_seconds"] / request_count
+            if request_count > 0
+            else 0.0
+        )
+
+        error_rate = (
+            error_count / request_count
+            if request_count > 0
+            else 0.0
+        )
+
+        return {
+            "request_count": request_count,
+            "successful_request_count": request_count - error_count,
+            "error_count": error_count,
+            "error_rate": error_rate,
+            "prediction_count": metrics["prediction_count"],
+            "prediction_distribution": {
+                "0": metrics["prediction_0_count"],
+                "1": metrics["prediction_1_count"],
+            },
+            "average_latency_seconds": average_latency,
+        }
+
+
 @app.post(
     "/predict",
     response_model=PredictionResponse,
@@ -80,15 +148,20 @@ def predict_order(order: OrderRequest):
 
         latency = time.perf_counter() - start
 
+        record_metrics(
+            latency=latency,
+            predictions=predictions,
+        )
+
         logger.info(
-               "Prediction request | input=%s | output=%s | latency=%.6fs | model_version=%s",
-                order.model_dump(),
-                      {
-                        "prediction": prediction,
-                        "probability": probability,
-                       },
-                latency,
-                config["mlflow"]["model_alias"],
+            "Prediction request | input=%s | output=%s | latency=%.6fs | model_version=%s",
+            order.model_dump(),
+            {
+                "prediction": prediction,
+                "probability": probability,
+            },
+            latency,
+            config["mlflow"]["model_alias"],
         )
 
         return {
@@ -100,12 +173,35 @@ def predict_order(order: OrderRequest):
         }
 
     except ValueError as exc:
+        latency = time.perf_counter() - start
+        record_metrics(
+            latency=latency,
+            error=True,
+        )
+
+        logger.error(
+            "Prediction validation error | error=%s | latency=%.6fs",
+            str(exc),
+            latency,
+        )
+
         raise HTTPException(
             status_code=422,
             detail=str(exc),
         ) from exc
 
     except Exception as exc:
+        latency = time.perf_counter() - start
+        record_metrics(
+            latency=latency,
+            error=True,
+        )
+
+        logger.exception(
+            "Prediction failed | latency=%.6fs",
+            latency,
+        )
+
         raise HTTPException(
             status_code=500,
             detail="Prediction failed.",
@@ -145,6 +241,11 @@ def predict_batch(request: BatchPredictionRequest):
 
         latency = time.perf_counter() - start
 
+        record_metrics(
+            latency=latency,
+            predictions=predictions,
+        )
+
         logger.info(
             "Batch prediction request | input=%s | output=%s | latency=%.6fs | model_version=%s",
             [order.model_dump() for order in request.orders],
@@ -158,12 +259,35 @@ def predict_batch(request: BatchPredictionRequest):
         }
 
     except ValueError as exc:
+        latency = time.perf_counter() - start
+        record_metrics(
+            latency=latency,
+            error=True,
+        )
+
+        logger.error(
+            "Batch prediction validation error | error=%s | latency=%.6fs",
+            str(exc),
+            latency,
+        )
+
         raise HTTPException(
             status_code=422,
             detail=str(exc),
         ) from exc
 
     except Exception as exc:
+        latency = time.perf_counter() - start
+        record_metrics(
+            latency=latency,
+            error=True,
+        )
+
+        logger.exception(
+            "Batch prediction failed | latency=%.6fs",
+            latency,
+        )
+
         raise HTTPException(
             status_code=500,
             detail="Batch prediction failed.",

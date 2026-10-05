@@ -1,0 +1,60 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: qafza-postgres
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow_password
+      POSTGRES_DB: mlflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow -d mlflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    container_name: qafza-mlflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+      - --backend-store-uri
+      - postgresql://mlflow:mlflow_password@postgres:5432/mlflow
+      - --artifacts-destination
+      - /mlartifacts
+      - --allowed-hosts
+      - mlflow:5000,127.0.0.1:5000,localhost:5000
+    volumes:
+      - mlflow_artifacts:/mlartifacts
+    ports:
+      - "5000:5000"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qafza-api
+    depends_on:
+      mlflow:
+        condition: service_started
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
+  mlflow_artifacts:
+

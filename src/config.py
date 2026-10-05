@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 import yaml
-
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,9 @@ def load_config():
     try:
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
+
+        if os.getenv("MLFLOW_TRACKING_URI"):
+            config["mlflow"]["tracking_uri"] = os.getenv("MLFLOW_TRACKING_URI")
 
         logger.info("Configuration loaded successfully.")
         return config

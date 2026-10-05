@@ -1,0 +1,5 @@
+outs:
+- md5: 86671f8d8f8e055d4b2ba7c4334f287d
+  size: 2823201
+  hash: md5
+  path: 03_validation1.parquet

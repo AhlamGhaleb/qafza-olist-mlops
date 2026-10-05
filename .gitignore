@@ -29,3 +29,6 @@ data/artifacts/model/*
 !data/artifacts/model/*.dvc
 mlflow.db
 mlartifacts/
+
+# VS Code
+.vscode/

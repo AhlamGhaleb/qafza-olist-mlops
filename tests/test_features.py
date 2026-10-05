@@ -53,3 +53,22 @@ def test_select_features_missing_feature():
 
     with pytest.raises(ValueError, match="Missing required features"):
         select_features(data)
+
+def test_select_features_excludes_target_and_delivery_outcome():
+    data = pd.DataFrame(
+        {
+            feature: [index]
+            for index, feature in enumerate(RAW_FEATURES)
+        }
+    )
+
+    data["is_delayed"] = [1]
+    data["order_delivered_customer_date"] = [
+        "2020-01-20 10:00:00"
+    ]
+
+    result = select_features(data)
+
+    assert "is_delayed" not in result.columns
+    assert "order_delivered_customer_date" not in result.columns
+    assert list(result.columns) == RAW_FEATURES
