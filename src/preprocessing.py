@@ -26,15 +26,11 @@ def load_preprocessor():
         return preprocessor
 
     except FileNotFoundError:
-        logger.error(
-            "Preprocessor file not found."
-        )
+        logger.error("Preprocessor file not found.")
         raise
 
     except Exception:
-        logger.exception(
-            "Failed to load the preprocessor."
-        )
+        logger.exception("Failed to load the preprocessor.")
         raise
 
 
@@ -67,7 +63,5 @@ def transform_features(data: pd.DataFrame) -> pd.DataFrame:
         return result
 
     except Exception:
-        logger.exception(
-            "Feature transformation failed."
-        )
+        logger.exception("Feature transformation failed.")
         raise

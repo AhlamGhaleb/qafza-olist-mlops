@@ -10,9 +10,7 @@ def run_inference(data: pd.DataFrame):
     validation_result = validate_input(data)
 
     if not validation_result.valid:
-        raise ValueError(
-            "; ".join(validation_result.errors)
-        )
+        raise ValueError("; ".join(validation_result.errors))
 
     data_with_features = create_time_features(data)
 
@@ -20,8 +18,6 @@ def run_inference(data: pd.DataFrame):
 
     processed_features = transform_features(raw_features)
 
-    predictions, probabilities = predict(
-        processed_features
-    )
+    predictions, probabilities = predict(processed_features)
 
     return predictions, probabilities

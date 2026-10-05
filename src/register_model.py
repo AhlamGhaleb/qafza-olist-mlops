@@ -11,22 +11,15 @@ from src.config import load_config
 def register_existing_model():
     config = load_config()
 
-    mlflow.set_tracking_uri(
-        config["mlflow"]["tracking_uri"]
-    )
+    mlflow.set_tracking_uri(config["mlflow"]["tracking_uri"])
 
-    model_path = Path(
-        config["artifacts"]["model"]
-    )
+    model_path = Path(config["artifacts"]["model"])
 
     model = joblib.load(model_path)
 
-    mlflow.set_experiment(
-        config["mlflow"]["experiment_name"]
-    )
+    mlflow.set_experiment(config["mlflow"]["experiment_name"])
 
     with mlflow.start_run() as run:
-
         mlflow.log_param(
             "model_type",
             type(model).__name__,
@@ -50,9 +43,7 @@ def register_existing_model():
         mlflow.sklearn.log_model(
             model,
             name="delivery_delay_model",
-            registered_model_name=config[
-                "mlflow"
-            ]["registered_model_name"],
+            registered_model_name=config["mlflow"]["registered_model_name"],
         )
 
         client = MlflowClient()
@@ -60,14 +51,10 @@ def register_existing_model():
         registered_model_name = config["mlflow"]["registered_model_name"]
         model_alias = config["mlflow"]["model_alias"]
 
-        model_versions = client.search_model_versions(
-            f"name='{registered_model_name}'"
-        )
+        model_versions = client.search_model_versions(f"name='{registered_model_name}'")
 
         current_version = next(
-            version
-            for version in model_versions
-            if version.run_id == run.info.run_id
+            version for version in model_versions if version.run_id == run.info.run_id
         )
 
         client.set_registered_model_alias(
@@ -77,8 +64,7 @@ def register_existing_model():
         )
 
         print(
-            f"Model version {current_version.version} "
-            f"assigned to alias '{model_alias}'"
+            f"Model version {current_version.version} assigned to alias '{model_alias}'"
         )
 
         print("MLflow run:", run.info.run_id)

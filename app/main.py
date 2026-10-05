@@ -73,9 +73,7 @@ def record_metrics(
     response_model=HealthResponse,
 )
 def health():
-    return {
-        "status": "ok"
-    }
+    return {"status": "ok"}
 
 
 @app.get(
@@ -84,12 +82,8 @@ def health():
 )
 def model_info():
     return {
-        "model_name": config["mlflow"][
-            "registered_model_name"
-        ],
-        "model_version": config["mlflow"][
-            "model_alias"
-        ],
+        "model_name": config["mlflow"]["registered_model_name"],
+        "model_version": config["mlflow"]["model_alias"],
         "threshold": config["model"]["threshold"],
     }
 
@@ -106,11 +100,7 @@ def get_metrics():
             else 0.0
         )
 
-        error_rate = (
-            error_count / request_count
-            if request_count > 0
-            else 0.0
-        )
+        error_rate = error_count / request_count if request_count > 0 else 0.0
 
         return {
             "request_count": request_count,
@@ -131,17 +121,12 @@ def get_metrics():
     response_model=PredictionResponse,
 )
 def predict_order(order: OrderRequest):
-
     start = time.perf_counter()
 
     try:
-        data = pd.DataFrame(
-            [order.model_dump()]
-        )
+        data = pd.DataFrame([order.model_dump()])
 
-        predictions, probabilities = run_inference(
-            data
-        )
+        predictions, probabilities = run_inference(data)
 
         prediction = int(predictions[0])
         probability = float(probabilities[0])
@@ -167,9 +152,7 @@ def predict_order(order: OrderRequest):
         return {
             "prediction": prediction,
             "probability": probability,
-            "model_version": config["mlflow"][
-                "model_alias"
-            ],
+            "model_version": config["mlflow"]["model_alias"],
         }
 
     except ValueError as exc:
@@ -213,25 +196,18 @@ def predict_order(order: OrderRequest):
     response_model=BatchPredictionResponse,
 )
 def predict_batch(request: BatchPredictionRequest):
-
     start = time.perf_counter()
 
     try:
-        data = pd.DataFrame(
-            [order.model_dump() for order in request.orders]
-        )
+        data = pd.DataFrame([order.model_dump() for order in request.orders])
 
-        predictions, probabilities = run_inference(
-            data
-        )
+        predictions, probabilities = run_inference(data)
 
         results = [
             {
                 "prediction": int(prediction),
                 "probability": float(probability),
-                "model_version": config["mlflow"][
-                    "model_alias"
-                ],
+                "model_version": config["mlflow"]["model_alias"],
             }
             for prediction, probability in zip(
                 predictions,

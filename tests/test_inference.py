@@ -22,14 +22,10 @@ def test_transform_features_matches_task2_artifact():
 
     processed_features = transform_features(raw_features)
 
-    expected_features = pd.read_parquet(
-        "data/artifacts/features/05_X_test.parquet"
-    )
+    expected_features = pd.read_parquet("data/artifacts/features/05_X_test.parquet")
 
     assert processed_features.shape == expected_features.shape
-    assert list(processed_features.columns) == list(
-        expected_features.columns
-    )
+    assert list(processed_features.columns) == list(expected_features.columns)
 
     pd.testing.assert_frame_equal(
         processed_features.reset_index(drop=True),
@@ -39,10 +35,9 @@ def test_transform_features_matches_task2_artifact():
         atol=1e-10,
     )
 
+
 def test_predict_output():
-    processed_features = pd.read_parquet(
-        "data/artifacts/features/05_X_test.parquet"
-    )
+    processed_features = pd.read_parquet("data/artifacts/features/05_X_test.parquet")
 
     predictions, probabilities = predict(processed_features)
 
@@ -51,6 +46,7 @@ def test_predict_output():
 
     assert set(predictions).issubset({0, 1})
     assert ((probabilities >= 0) & (probabilities <= 1)).all()
+
 
 def test_validate_input_accepts_valid_data():
     data = load_raw_test_data().head(1)
@@ -89,6 +85,7 @@ def test_validate_input_rejects_invalid_num_items():
 
     assert result.valid is False
     assert "num_items must be greater than zero." in result.errors
+
 
 def test_run_inference():
     data = load_raw_test_data().head(10)

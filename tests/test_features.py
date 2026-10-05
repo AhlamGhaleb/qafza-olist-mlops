@@ -7,15 +7,12 @@ from src.features import (
     select_features,
 )
 
+
 def test_create_time_features():
     data = pd.DataFrame(
         {
-            "order_purchase_timestamp": [
-                "2020-01-10 10:00:00"
-            ],
-            "order_estimated_delivery_date": [
-                "2020-01-15 10:00:00"
-            ],
+            "order_purchase_timestamp": ["2020-01-10 10:00:00"],
+            "order_estimated_delivery_date": ["2020-01-15 10:00:00"],
         }
     )
 
@@ -26,12 +23,10 @@ def test_create_time_features():
     assert result.loc[0, "purchase_hour"] == 10
     assert result.loc[0, "estimated_delivery_days"] == 5
 
+
 def test_select_features():
     data = pd.DataFrame(
-        {
-            feature: [index]
-            for index, feature in enumerate(RAW_FEATURES)
-        }
+        {feature: [index] for index, feature in enumerate(RAW_FEATURES)}
     )
 
     data["extra_column"] = [999]
@@ -41,6 +36,7 @@ def test_select_features():
     assert list(result.columns) == RAW_FEATURES
     assert result.shape == (1, len(RAW_FEATURES))
     assert "extra_column" not in result.columns
+
 
 def test_select_features_missing_feature():
     data = pd.DataFrame(
@@ -54,18 +50,14 @@ def test_select_features_missing_feature():
     with pytest.raises(ValueError, match="Missing required features"):
         select_features(data)
 
+
 def test_select_features_excludes_target_and_delivery_outcome():
     data = pd.DataFrame(
-        {
-            feature: [index]
-            for index, feature in enumerate(RAW_FEATURES)
-        }
+        {feature: [index] for index, feature in enumerate(RAW_FEATURES)}
     )
 
     data["is_delayed"] = [1]
-    data["order_delivered_customer_date"] = [
-        "2020-01-20 10:00:00"
-    ]
+    data["order_delivered_customer_date"] = ["2020-01-20 10:00:00"]
 
     result = select_features(data)
 

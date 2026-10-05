@@ -24,9 +24,7 @@ def main():
     input_path = Path(args.input)
 
     if not input_path.exists():
-        parser.error(
-            f"Input file not found: {input_path}"
-        )
+        parser.error(f"Input file not found: {input_path}")
 
     try:
         with open(
@@ -59,9 +57,7 @@ def main():
         parser.error(str(exc))
 
     except Exception as exc:
-        parser.error(
-            f"Inference failed: {exc}"
-        )
+        parser.error(f"Inference failed: {exc}")
 
 
 if __name__ == "__main__":

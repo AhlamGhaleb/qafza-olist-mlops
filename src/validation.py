@@ -29,15 +29,11 @@ def validate_input(data: pd.DataFrame) -> ValidationResult:
     errors = []
 
     missing_columns = [
-        column
-        for column in REQUIRED_COLUMNS
-        if column not in data.columns
+        column for column in REQUIRED_COLUMNS if column not in data.columns
     ]
 
     if missing_columns:
-        errors.append(
-            f"Missing required columns: {missing_columns}"
-        )
+        errors.append(f"Missing required columns: {missing_columns}")
 
     if errors:
         return ValidationResult(
@@ -60,9 +56,7 @@ def validate_input(data: pd.DataFrame) -> ValidationResult:
 
     for column in numeric_columns:
         if data[column].isna().all():
-            errors.append(
-                f"{column} contains only missing values."
-            )
+            errors.append(f"{column} contains only missing values.")
 
     if (data["total_freight"] < 0).any():
         errors.append("total_freight cannot be negative.")
@@ -74,24 +68,19 @@ def validate_input(data: pd.DataFrame) -> ValidationResult:
         errors.append("num_items must be greater than zero.")
 
     if (data["num_unique_products"] <= 0).any():
-        errors.append(
-            "num_unique_products must be greater than zero."
-        )
+        errors.append("num_unique_products must be greater than zero.")
 
     if (data["num_unique_sellers"] <= 0).any():
-        errors.append(
-            "num_unique_sellers must be greater than zero."
-        )
+        errors.append("num_unique_sellers must be greater than zero.")
 
     return ValidationResult(
         valid=len(errors) == 0,
         errors=errors,
     )
 
+
 def validate_with_great_expectations(data: pd.DataFrame) -> list[str]:
-    context = gx.get_context(
-        context_root_dir=str(PROJECT_ROOT / "gx")
-    )
+    context = gx.get_context(context_root_dir=str(PROJECT_ROOT / "gx"))
 
     suite = context.suites.get("olist_inference_input_quality")
 
@@ -112,9 +101,7 @@ def validate_with_great_expectations(data: pd.DataFrame) -> list[str]:
             errors="coerce",
         )
 
-    batch = batch_definition.get_batch(
-        batch_parameters={"dataframe": ge_data}
-    )
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": ge_data})
 
     result = batch.validate(suite)
 
@@ -122,12 +109,7 @@ def validate_with_great_expectations(data: pd.DataFrame) -> list[str]:
         return []
 
     failed_expectations = [
-        item.expectation_config.type
-        for item in result.results
-        if not item.success
+        item.expectation_config.type for item in result.results if not item.success
     ]
 
-    return [
-        "Great Expectations validation failed: "
-        + ", ".join(failed_expectations)
-    ]
+    return ["Great Expectations validation failed: " + ", ".join(failed_expectations)]

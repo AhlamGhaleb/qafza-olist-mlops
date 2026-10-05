@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from app.main import app,config
+from app.main import app, config
 
 
 client = TestClient(app)
@@ -33,6 +33,7 @@ def test_model_info():
     assert data["model_name"] == config["mlflow"]["registered_model_name"]
     assert data["model_version"] == config["mlflow"]["model_alias"]
     assert data["threshold"] == config["model"]["threshold"]
+
 
 def test_predict():
     order = load_sample_order()
@@ -68,6 +69,5 @@ def test_predict_batch():
         assert result["model_version"] == "production"
 
     assert (
-        data["predictions"][0]["probability"]
-        == data["predictions"][1]["probability"]
+        data["predictions"][0]["probability"] == data["predictions"][1]["probability"]
     )

@@ -26,9 +26,7 @@ def load_model():
 
         mlflow.set_tracking_uri(tracking_uri)
 
-        model_uri = (
-            f"models:/{registered_model_name}@{model_alias}"
-        )
+        model_uri = f"models:/{registered_model_name}@{model_alias}"
 
         model = mlflow.sklearn.load_model(model_uri)
 
@@ -40,9 +38,7 @@ def load_model():
         return model
 
     except Exception:
-        logger.exception(
-            "Failed to load model from MLflow Registry."
-        )
+        logger.exception("Failed to load model from MLflow Registry.")
         raise
 
 
@@ -66,8 +62,7 @@ def predict(data: pd.DataFrame):
         predictions = (probabilities >= threshold).astype(int)
 
         logger.info(
-            "Prediction completed successfully. "
-            "Input rows: %s, threshold: %s",
+            "Prediction completed successfully. Input rows: %s, threshold: %s",
             len(data),
             threshold,
         )
@@ -75,7 +70,5 @@ def predict(data: pd.DataFrame):
         return predictions, probabilities
 
     except Exception:
-        logger.exception(
-            "Prediction failed."
-        )
+        logger.exception("Prediction failed.")
         raise
