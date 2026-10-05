@@ -31,4 +31,6 @@ mlflow.db
 mlartifacts/
 
 # VS Code
+.vscode/.env
+.vs/
 .vscode/
